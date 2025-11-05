@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคำนวณกองทุนสำรองเลี้ยงชีพ (PVD)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better readability and a clean look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for better scrolling on smaller screens */
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 900px; /* Increased max-width for better table display */
+            width: 100%;
+            margin-top: 20px;
+        }
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #2563eb; /* Blue focus ring */
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #2563eb; /* Blue button */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Darker blue on hover */
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem; /* Slightly smaller font for table */
+        }
+        th, td {
+            border: 1px solid #e5e7eb;
+            padding: 10px 15px;
+            text-align: right; /* Align numbers to the right */
+        }
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            text-align: center; /* Center headers */
+        }
+        tr:nth-child(even) {
+            background-color: #f3f4f6;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-left {
+            text-align: left;
+        }
+        .error-message {
+            color: #ef4444; /* Red for error messages */
+            margin-top: -10px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            .grid-cols-2 {
+                grid-template-columns: 1fr; /* Stack columns on small screens */
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+            table {
+                font-size: 0.85rem;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            button {
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-6 text-gray-800">เครื่องคำนวณกองทุนสำรองเลี้ยงชีพ (PVD)</h1>
+
+        <div id="input-section" class="mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="salary" class="block text-gray-700 text-sm font-medium mb-2">รายได้ต่อเดือนปัจจุบัน (บาท):</label>
+                    <input type="number" id="salary" value="15000" min="0" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="employeeContrib" class="block text-gray-700 text-sm font-medium mb-2">% สะสมของลูกจ้าง (%):</label>
+                    <input type="number" id="employeeContrib" value="3" min="0" max="15" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="currentAge" class="block text-gray-700 text-sm font-medium mb-2">อายุปัจจุบัน (ปี):</label>
+                    <input type="number" id="currentAge" value="25" min="1" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="workingYears" class="block text-gray-700 text-sm font-medium mb-2">อายุงานปัจจุบัน (ปี):</label>
+                    <input type="number" id="workingYears" value="1" min="0" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="avgReturn" class="block text-gray-700 text-sm font-medium mb-2">ผลตอบแทนเฉลี่ยต่อปี (%):</label>
+                    <input type="number" id="avgReturn" value="5" min="0" class="rounded-lg">
+                </div>
+                <div>
+                    <label for="annualSalaryIncrease" class="block text-gray-700 text-sm font-medium mb-2">อัตราการขึ้นเงินเดือนเฉลี่ยต่อปี (%):</label>
+                    <input type="number" id="annualSalaryIncrease" value="3" min="0" class="rounded-lg">
+                </div>
+                <div class="md:col-span-2">
+                    <label for="currentPVD" class="block text-gray-700 text-sm font-medium mb-2">เงินกองทุนสะสมปัจจุบัน (บาท):</label>
+                    <input type="number" id="currentPVD" value="0" min="0" class="rounded-lg">
+                </div>
+            </div>
+            <div id="errorMessages" class="error-message hidden mt-4"></div>
+            <button onclick="calculatePVD()" class="mt-6 rounded-lg">คำนวณ</button>
+        </div>
+
+        <div id="results-section" class="hidden">
+            <h2 class="text-2xl font-semibold text-center mb-4 text-gray-700">สรุปผลการคำนวณกองทุนสำรองเลี้ยงชีพ</h2>
+            <div class="bg-blue-50 p-4 rounded-lg mb-6 text-gray-800">
+                <p class="mb-2"><span class="font-medium">เงินสะสมปัจจุบัน:</span> <span id="currentPVDDisplay"></span> บาท</p>
+                <p class="mb-2"><span class="font-medium">ระยะเวลาสะสม:</span> <span id="yearsToRetirement"></span> ปี</p>
+                <p><span class="font-medium">มูลค่ากองทุนเมื่อเกษียณ (ประมาณ):</span> <span id="accumulatedValueAtRetirement"></span> บาท</p>
+            </div>
+
+            <h2 class="text-2xl font-semibold text-center mb-4 text-gray-700">ตารางการสะสมรายปี</h2>
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table id="pvdTable" class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">ปีที่</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">เงินเดือนเฉลี่ยปีนี้ (บาท)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">อายุงานปีนี้ (ปี)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">สมทบนายจ้าง (%)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">เงินสะสมลูกจ้าง (บาท)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">เงินสมทบนายจ้าง (บาท)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">รวมสะสมปีนี้ (บาท)</th>
+                            <th class="px-6 py-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">ยอดกองทุนสะสมปลายปี (บาท)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Table rows will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculatePVD() {
+            // Get input values
+            const salary = parseFloat(document.getElementById('salary').value);
+            const employeeContribPercent = parseFloat(document.getElementById('employeeContrib').value);
+            const currentAge = parseInt(document.getElementById('currentAge').value);
+            const workingYears = parseInt(document.getElementById('workingYears').value);
+            const avgReturnPercent = parseFloat(document.getElementById('avgReturn').value);
+            const annualSalaryIncreasePercent = parseFloat(document.getElementById('annualSalaryIncrease').value);
+            const currentPVD_balance = parseFloat(document.getElementById('currentPVD').value);
+
+            const errorMessagesDiv = document.getElementById('errorMessages');
+            errorMessagesDiv.classList.add('hidden');
+            errorMessagesDiv.innerHTML = '';
+
+            // Input validation
+            if (isNaN(salary) || salary <= 0) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกรายได้ต่อเดือนปัจจุบันที่ถูกต้อง (ต้องมากกว่า 0).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(employeeContribPercent) || employeeContribPercent < 0 || employeeContribPercent > 100) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอก % สะสมของลูกจ้างที่ถูกต้อง (0-100%).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(currentAge) || currentAge < 1) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกอายุปัจจุบันที่ถูกต้อง (ต้องมากกว่า 0).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(workingYears) || workingYears < 0) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกอายุงานปัจจุบันที่ถูกต้อง (ต้องไม่ติดลบ).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(avgReturnPercent) || avgReturnPercent < 0) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกผลตอบแทนเฉลี่ยต่อปีที่ถูกต้อง (ต้องไม่ติดลบ).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(annualSalaryIncreasePercent) || annualSalaryIncreasePercent < 0) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกอัตราการขึ้นเงินเดือนเฉลี่ยต่อปีที่ถูกต้อง (ต้องไม่ติดลบ).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(currentPVD_balance) || currentPVD_balance < 0) {
+                errorMessagesDiv.innerHTML = 'กรุณากรอกเงินกองทุนสะสมปัจจุบันที่ถูกต้อง (ต้องไม่ติดลบ).';
+                errorMessagesDiv.classList.remove('hidden');
+                return;
+            }
+
+            const retirementAge = 60;
+            const yearsToRetirement = retirementAge - currentAge;
+
+            if (yearsToRetirement <= 0) {
+                errorMessagesDiv.innerHTML = 'คุณเกษียณแล้ว หรือใกล้เกษียณเกินไป ไม่สามารถคำนวณได้';
+                errorMessagesDiv.classList.remove('hidden');
+                document.getElementById('results-section').classList.add('hidden');
+                return;
+            }
+
+            // Convert percentages to decimal rates
+            const employeeRate = employeeContribPercent / 100;
+            const returnRate = avgReturnPercent / 100;
+            const salaryIncreaseRate = annualSalaryIncreasePercent / 100;
+
+            // Initialize accumulated value and current salary
+            let accumulatedValue = currentPVD_balance;
+            let currentSalary = salary;
+            let currentWorkingYears = workingYears; // Initialize current working years for the loop
+
+            // Generate yearly projection data
+            const data = [];
+
+            for (let year = 1; year <= yearsToRetirement; year++) {
+                // Calculate employer contribution percentage based on working years for THIS year
+                let employerRate;
+                if (currentWorkingYears < 5) {
+                    employerRate = 0.05;
+                } else if (currentWorkingYears >= 5 && currentWorkingYears <= 9) {
+                    employerRate = 0.06;
+                } else if (currentWorkingYears >= 10 && currentWorkingYears <= 19) {
+                    employerRate = 0.12;
+                } else {
+                    employerRate = 0.15;
+                }
+
+                const yearlyEmployee = currentSalary * employeeRate * 12;
+                const yearlyEmployer = currentSalary * employerRate * 12;
+                const yearlyTotal = yearlyEmployee + yearlyEmployer;
+                accumulatedValue = (accumulatedValue + yearlyTotal) * (1 + returnRate);
+
+                data.push({
+                    "ปีที่": year,
+                    "เงินเดือนเฉลี่ยปีนี้ (บาท)": currentSalary * 12, // Display annual salary for the current year
+                    "อายุงานปีนี้ (ปี)": currentWorkingYears, // Add working years for this specific year
+                    "สมทบนายจ้าง (%)": employerRate * 100, // Add employer contribution percentage for this specific year
+                    "เงินสะสมลูกจ้าง (บาท)": yearlyEmployee,
+                    "เงินสมทบนายจ้าง (บาท)": yearlyEmployer,
+                    "รวมสะสมปีนี้ (บาท)": yearlyTotal,
+                    "ยอดกองทุนสะสมปลายปี (บาท)": accumulatedValue
+                });
+
+                // Adjust salary and working years for the next year
+                currentSalary *= (1 + salaryIncreaseRate);
+                currentWorkingYears += 1;
+            }
+
+            // Display summary results
+            document.getElementById('currentPVDDisplay').textContent = currentPVD_balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('yearsToRetirement').textContent = yearsToRetirement;
+            document.getElementById('accumulatedValueAtRetirement').textContent = accumulatedValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Populate the table
+            const tableBody = document.querySelector('#pvdTable tbody');
+            tableBody.innerHTML = ''; // Clear previous rows
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-center">${row["ปีที่"]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${row["เงินเดือนเฉลี่ยปีนี้ (บาท)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">${row["อายุงานปีนี้ (ปี)"]}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">${row["สมทบนายจ้าง (%)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${row["เงินสะสมลูกจ้าง (บาท)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${row["เงินสมทบนายจ้าง (บาท)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${row["รวมสะสมปีนี้ (บาท)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${row["ยอดกองทุนสะสมปลายปี (บาท)"].toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            // Show results section
+            document.getElementById('results-section').classList.remove('hidden');
+        }
+
+        // Initial calculation on page load with default values
+        document.addEventListener('DOMContentLoaded', calculatePVD);
+    </script>
+</body>
+</html>
